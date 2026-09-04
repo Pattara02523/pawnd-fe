@@ -8,7 +8,7 @@ import type { PostType } from '@/types/post';
 /** ตัวเลือกประเภทประกาศที่ใช้ทั้งกับ marker และ nearby endpoint */
 export type PostTypeFilter = 'ALL' | PostType;
 
-/** ตัวเลือกช่วงเวลาที่กรองข้อมูลจาก createdAt ฝั่ง client */
+/** ตัวเลือกช่วงเวลาที่กรองข้อมูลจาก eventDate ฝั่ง client */
 export type TimeFilter = 'ALL' | 'ONE_DAY' | 'SEVEN_DAYS' | 'THIRTY_DAYS';
 
 /** ตัวเลือกรัศมีที่ตรงกับค่าที่ nearby endpoint รองรับในหน้าเดิม */

@@ -32,29 +32,32 @@ export function formatDistance(distanceKm: number): string {
   return `${distanceKm.toFixed(distanceKm < 10 ? 1 : 0)} กม.`;
 }
 
-/** กรองวันที่ของประกาศในฝั่ง client โดยไม่ส่ง query ที่ Backend ไม่รองรับ */
+/**
+ * กรองวันที่เกิดเหตุของประกาศในฝั่ง client โดยไม่ส่ง query ที่ Backend ไม่รองรับ
+ * ใช้ eventDate ซึ่งเป็นวันที่หาย/พบที่ผู้ใช้ระบุในประกาศและเห็นใน Popup
+ */
 export function matchesTimeFilter(
-  createdAt: string | null | undefined,
+  eventDate: string | null | undefined,
   filter: TimeFilter,
 ): boolean {
   if (filter === 'ALL') {
     return true;
   }
 
-  if (!createdAt) {
+  if (!eventDate) {
     return false;
   }
 
-  const parsedDate = new Date(createdAt);
+  const parsedDate = new Date(eventDate);
   if (Number.isNaN(parsedDate.getTime())) {
     return false;
   }
 
   const days = filter === 'ONE_DAY' ? 1 : filter === 'SEVEN_DAYS' ? 7 : 30;
   const now = Date.now();
-  const createdTimestamp = parsedDate.getTime();
+  const eventTimestamp = parsedDate.getTime();
   return (
-    createdTimestamp <= now &&
-    createdTimestamp >= now - days * 24 * 60 * 60 * 1000
+    eventTimestamp <= now &&
+    eventTimestamp >= now - days * 24 * 60 * 60 * 1000
   );
 }

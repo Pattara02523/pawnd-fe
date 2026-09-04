@@ -78,20 +78,20 @@ export function MapPageClient() {
   }, []);
 
   /**
-   * กรอง marker และ nearby list ด้วย createdAt จริงจาก response ของแต่ละ endpoint
+   * กรอง marker และ nearby list ด้วย eventDate จริงจาก response ของแต่ละ endpoint
    * โดยใช้เกณฑ์เดียวกันและไม่เปลี่ยน viewport หรือเรียก API ใหม่
    */
   const visibleMarkerPosts = useMemo(
     () =>
       viewportData.features.filter((feature) =>
-        matchesTimeFilter(feature.properties.createdAt, timeFilter),
+        matchesTimeFilter(feature.properties.eventDate, timeFilter),
       ),
     [timeFilter, viewportData.features],
   );
   const visibleNearbyPosts = useMemo(
     () =>
       nearbyData.features.filter((feature) =>
-        matchesTimeFilter(feature.properties.createdAt, timeFilter),
+        matchesTimeFilter(feature.properties.eventDate, timeFilter),
       ),
     [nearbyData.features, timeFilter],
   );
@@ -120,7 +120,7 @@ export function MapPageClient() {
       ].find((feature) => feature.properties.id === selectedPostId);
       if (
         !selectedPost ||
-        !matchesTimeFilter(selectedPost.properties.createdAt, nextFilter)
+        !matchesTimeFilter(selectedPost.properties.eventDate, nextFilter)
       ) {
         setSelectedPostId(null);
         setSelectedPostLocation(null);
