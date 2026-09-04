@@ -9,7 +9,9 @@ export type ApiFetchOption = Omit<RequestInit, 'body'> & {
   };
 };
 
-const API_URL = process.env.API_URL ?? 'http://localhost:8000';
+// ตัด trailing slash ออกจาก API_URL ป้องกันปัญหา double slash เช่น https://example.com//auth/register
+const API_URL = (process.env.API_URL ?? 'http://localhost:8000').replace(/\/$/, '');
+
 export async function apiFetch<T>(
   path: string,
   options: ApiFetchOption = {},
@@ -32,13 +34,22 @@ export async function apiFetch<T>(
     newBody = body;
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
-    ...init,
-    body: newBody,
-    headers: newHeaders,
-  });
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const url = `${API_URL}${normalizedPath}`;
 
-  //จะสร้าง class ApiError (api-error.ts) เอง เพื่อเวลาเกิดไรขึ้น เราจะให้ server action ดักจับ
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...init,
+      body: newBody,
+      headers: newHeaders,
+    });
+  } catch (fetchError) {
+    console.error(`[apiFetch Network Error] Failed to fetch ${url}:`, fetchError);
+    throw fetchError;
+  }
+
+  // จะสร้าง class ApiError (api-error.ts) เอง เพื่อเวลาเกิดไรขึ้น เราจะให้ server action ดักจับ
   if (!response.ok) {
     const errorText = await response.text();
     let message = response.statusText;
@@ -54,6 +65,7 @@ export async function apiFetch<T>(
         message = errorText;
       }
     }
+    console.error(`[apiFetch Error] ${response.status} ${url}:`, message);
     throw new ApiError(response.status, message);
   }
 

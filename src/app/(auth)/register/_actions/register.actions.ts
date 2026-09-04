@@ -23,6 +23,7 @@ export async function registerAction(
   try {
     await registerRequest(payload);
   } catch (err) {
+    console.error('[registerAction Error]:', err);
     return toErrorResult(err, 'สมัครสมาชิกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
   }
 

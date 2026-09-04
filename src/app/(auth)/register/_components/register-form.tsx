@@ -87,6 +87,7 @@ export function RegisterForm() {
     register,
     handleSubmit,
     control,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
@@ -205,9 +206,24 @@ export function RegisterForm() {
       </div>
 
       {formError && (
-        <p className="rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {formError}
-        </p>
+        <div className="flex flex-col gap-2 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
+          <p>{formError}</p>
+          {/* ปุ่มช่วยเหลือกรณีผู้ใช้เคยสมัครไว้แล้วหรือข้อมูลลง DB แล้วแต่ยังไม่ได้ยืนยัน OTP */}
+          <button
+            type="button"
+            className="self-start text-xs font-semibold text-primary underline hover:opacity-80 cursor-pointer"
+            onClick={() => {
+              const currentEmail = getValues('email') || registeredEmail;
+              if (currentEmail) {
+                setRegisteredEmail(currentEmail);
+                setStep('otp');
+                resendCooldown.start();
+              }
+            }}
+          >
+            เคยสมัครแล้วแต่ยังไม่ได้ยืนยันรหัส OTP? คลิกที่นี่เพื่อกรอก OTP หรือขอรหัสใหม่
+          </button>
+        </div>
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
