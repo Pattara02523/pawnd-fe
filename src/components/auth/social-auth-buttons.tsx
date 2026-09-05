@@ -97,16 +97,24 @@ export function SocialAuthButtons({
       callback: (response) => handleGoogleCredential(response.credential),
     });
     const container = googleContainer.current;
-    window.google.accounts.id.renderButton(container, {
-      type: 'standard',
-      theme: 'outline',
-      size: 'large',
-      text: mode === 'register' ? 'signup_with' : 'signin_with',
-      shape: 'pill',
-      width: Math.min(container.clientWidth, 400),
-      locale: 'th',
-    });
+    // วาดปุ่มใหม่เมื่อกรอบเปลี่ยนขนาด ให้กว้างเท่ากับ LINE ทั้งมือถือและ Desktop
+    const renderGoogleButton = () => {
+      container.replaceChildren();
+      window.google?.accounts.id.renderButton(container, {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+        text: mode === 'register' ? 'signup_with' : 'signin_with',
+        shape: 'pill',
+        width: Math.min(container.clientWidth, 400),
+        locale: 'th',
+      });
+    };
+    renderGoogleButton();
+    const observer = new ResizeObserver(renderGoogleButton);
+    observer.observe(container);
     return () => {
+      observer.disconnect();
       container.replaceChildren();
     };
   }, [googleReady, googleClientId, handleGoogleCredential, mode]);
@@ -187,7 +195,10 @@ export function SocialAuthButtons({
   };
 
   return (
-    <div className="flex flex-col gap-4" aria-busy={isPending || lineStarting}>
+    <div
+      className="mx-auto flex w-full max-w-[400px] flex-col gap-4 [&_[data-slot=button]]:min-h-10 [&_[data-slot=button]]:rounded-full"
+      aria-busy={isPending || lineStarting}
+    >
       {/* โหลด SDK ที่ทั้งสองหน้าใช้ร่วมกัน รองรับกลับมาใช้สคริปต์ที่โหลดไว้แล้ว */}
       <Script
         src="https://accounts.google.com/gsi/client"
@@ -233,7 +244,7 @@ export function SocialAuthButtons({
         size="lg"
         disabled={!lineChannelId || isPending || lineStarting}
         onClick={handleLineClick}
-        className="w-full bg-[#06C755] text-white hover:bg-[#05b34c]"
+        className="h-10 min-h-10! w-full bg-[#06C755] text-white hover:bg-[#05b34c]"
       >
         <LineIcon className="size-4" />
         {lineStarting

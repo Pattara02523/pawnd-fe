@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserProfile } from '@/types/user';
+import { useSession } from 'next-auth/react';
 import { logoutAction } from '@/lib/action/logout.actions';
 import { UserAvatar } from '@/components/common/UserAvatar';
 
@@ -56,8 +57,11 @@ const PROFILE_NAV_ITEMS = [
  * - บน Mobile: แถบแท็บแนวนอนด้านบน (Mobile Tab Bar) พร้อมปุ่ม Drawer สไลด์เปิดเมนูผู้ใช้เต็มรูปแบบ
  * - แสดงสถานะ Active Highlight สวยงามทุกหน้าจอ
  */
-export function ProfileSidebar({ user }: ProfileSidebarProps) {
+export function ProfileSidebar({ user: initialUser }: ProfileSidebarProps) {
   const pathname = usePathname();
+  // อ่านชื่อและรูปจาก session เดียวกับ Header
+  const { data: session } = useSession();
+  const user = session?.user ?? initialUser;
 
   // State ย่อ-ขยาย Sidebar บน Desktop (True = ขยายเต็ม, False = ย่อเหลือกะทัดรัด)
   const [isExpanded, setIsExpanded] = useState(true);
@@ -122,8 +126,8 @@ export function ProfileSidebar({ user }: ProfileSidebarProps) {
               item.href === '/dashboard'
                 ? pathname === '/dashboard' || pathname === '/profile/dashboard'
                 : item.href === '/profile'
-                ? pathname === '/profile'
-                : pathname.startsWith(item.href);
+                  ? pathname === '/profile'
+                  : pathname.startsWith(item.href);
 
             return (
               <Link
@@ -306,8 +310,8 @@ export function ProfileSidebar({ user }: ProfileSidebarProps) {
               item.href === '/dashboard'
                 ? pathname === '/dashboard' || pathname === '/profile/dashboard'
                 : item.href === '/profile'
-                ? pathname === '/profile'
-                : pathname.startsWith(item.href);
+                  ? pathname === '/profile'
+                  : pathname.startsWith(item.href);
 
             return (
               <Link

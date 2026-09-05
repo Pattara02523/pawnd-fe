@@ -98,6 +98,15 @@ export async function loginWithLineAction(
   try {
     response = await loginWithLineRequest({ code, redirectUri });
   } catch (err) {
+    // อธิบายกรณีอีเมล LINE ซ้ำ โดยคงกฎไม่ผูกบัญชีอัตโนมัติ
+    if (err instanceof ApiError && err.statusCode === 409) {
+      return {
+        success: false,
+        code: '409',
+        message:
+          'อีเมลของ LINE นี้ถูกใช้สมัคร PAWND แล้ว กรุณาเข้าสู่ระบบด้วยช่องทางเดิมที่เคยใช้ เช่น Google หรืออีเมลและรหัสผ่าน',
+      };
+    }
     return toErrorResult(
       err,
       'เข้าสู่ระบบด้วย LINE ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',

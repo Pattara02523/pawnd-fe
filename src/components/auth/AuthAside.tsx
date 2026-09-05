@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
@@ -28,7 +29,11 @@ export function AuthAside({
       )}
     >
       {/* โลโก้แบรนด์ ขยายขนาดให้เด่นขึ้น */}
-      <div className="flex items-center gap-3">
+      <Link
+        href="/"
+        aria-label="PAWND กลับหน้าแรก"
+        className="flex w-fit items-center gap-3"
+      >
         <div
           className={cn(
             appearance === 'entry' &&
@@ -54,7 +59,7 @@ export function AuthAside({
         >
           PAWND
         </span>
-      </div>
+      </Link>
 
       {/* ภาพประกอบ + ข้อความหลักตรงกลาง */}
       <div className="flex flex-col items-center gap-8 text-center">

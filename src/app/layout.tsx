@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import '@styles/globals.css';
+import { SessionSync } from '@/components/auth/session-sync';
 import { SessionProvider } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 import { notoSans } from '@/styles/font';
@@ -43,6 +44,8 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground transition-colors duration-200">
         <SessionProvider>
+          {/* ซิงก์สถานะผู้ใช้หลัง Login และ Logout */}
+          <SessionSync />
           <ThemeProvider>{children}</ThemeProvider>
         </SessionProvider>
       </body>

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { ReactNode } from 'react';
 import Image from 'next/image';
 
@@ -16,7 +17,11 @@ export function AuthEntryLayout({ children }: { children: ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col bg-muted/30">
         {/* โลโก้เดิมจัดสัดส่วนให้ตรงกับด้านซ้าย โดยไม่เปลี่ยนอัตลักษณ์แบรนด์ */}
-        <div className="flex items-center gap-3 px-6 py-6 sm:px-10">
+        <Link
+          href="/"
+          aria-label="PAWND กลับหน้าแรก"
+          className="flex w-fit items-center gap-3 px-6 py-6 sm:px-10"
+        >
           <div className="flex size-12 items-center justify-center rounded-2xl border border-border bg-background">
             <Image
               src="/logo.png"
@@ -29,7 +34,7 @@ export function AuthEntryLayout({ children }: { children: ReactNode }) {
           <span className="text-xl font-bold tracking-wide text-foreground">
             PAWND
           </span>
-        </div>
+        </Link>
 
         {/* กรอบฟอร์มและขนาด controls จำกัดผลเฉพาะ Login/Register ไม่แก้ UI primitives ทั่วเว็บ */}
         <main className="flex flex-1 items-center justify-center px-4 pb-8 sm:px-8 sm:pb-10">
