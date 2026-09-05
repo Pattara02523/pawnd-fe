@@ -15,6 +15,42 @@ export interface LoginTokensResponse {
   user: SessionUser;
 }
 
+/** ตรวจผล social ที่สำเร็จก่อนเปิด session และปฏิเสธ response เก่าหรือผิดรูปแบบ */
+export function isLoginTokensResponse(
+  response: unknown,
+): response is LoginTokensResponse {
+  if (
+    !response ||
+    typeof response !== 'object' ||
+    !('accessToken' in response) ||
+    typeof response.accessToken !== 'string' ||
+    !response.accessToken ||
+    !('refreshToken' in response) ||
+    typeof response.refreshToken !== 'string' ||
+    !response.refreshToken ||
+    !('user' in response)
+  )
+    return false;
+  const user = response.user;
+  return (
+    !!user &&
+    typeof user === 'object' &&
+    'id' in user &&
+    typeof user.id === 'string' &&
+    !!user.id &&
+    'email' in user &&
+    typeof user.email === 'string' &&
+    'firstName' in user &&
+    typeof user.firstName === 'string' &&
+    'lastName' in user &&
+    typeof user.lastName === 'string' &&
+    'role' in user &&
+    (user.role === 'USER' || user.role === 'ADMIN') &&
+    'avatarUrl' in user &&
+    (user.avatarUrl === null || typeof user.avatarUrl === 'string')
+  );
+}
+
 export interface LoginOtpRequiredResponse {
   tempToken: string;
   type: 'OTP_REQUIRED';
@@ -62,5 +98,11 @@ export function isLineEmailRequired(
 export function isPendingEmailVerification(
   response: AnyLoginResult,
 ): response is PendingEmailVerificationResponse {
-  return !('tempToken' in response);
+  // แยกผลรอยืนยันออกจากผลที่มี accessToken เพื่อไม่ให้ล็อกอินสำเร็จถูกตีความผิด
+  return (
+    'email' in response &&
+    'message' in response &&
+    !('accessToken' in response) &&
+    !('tempToken' in response)
+  );
 }

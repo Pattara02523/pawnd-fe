@@ -10,19 +10,16 @@ import {
   verifyTwoFactorRequest,
   loginWithGoogleRequest,
   loginWithLineRequest,
-  completeLineRegistrationRequest,
   resendTwoFactorRequest,
   LoginPayload,
   VerifyTwoFactorPayload,
-  CompleteLineRegistrationPayload,
   ResendTwoFactorPayload,
   getMeRequest,
 } from '@/services/auth.service';
 
 import {
   isOtpRequired,
-  isPendingEmailVerification,
-  isLineEmailRequired,
+  isLoginTokensResponse,
   LoginTokensResponse,
 } from '@/types/auth';
 
@@ -30,12 +27,6 @@ type LoginActionResult =
   | ErrorActionResult
   | { success: true; needsOtp: true; tempToken: string }
   | { success: true; needsOtp: false };
-
-type GoogleLoginActionResult =
-  | ErrorActionResult
-  | { success: true; needsOtp: true; tempToken: string }
-  | { success: true; needsOtp: false }
-  | { success: true; needsVerification: true; email: string; message: string };
 
 function toErrorResult(err: unknown, fallback: string): ErrorActionResult {
   if (err instanceof ApiError) {
@@ -75,9 +66,10 @@ export async function loginAction(
   redirect('/');
 }
 
+/** ตรวจ Google token ผ่าน Backend แล้วเปิด session โดยไม่เข้าเส้นทาง OTP */
 export async function loginWithGoogleAction(
   idToken: string,
-): Promise<GoogleLoginActionResult> {
+): Promise<ErrorActionResult> {
   let response;
   try {
     response = await loginWithGoogleRequest({ idToken });
@@ -87,35 +79,21 @@ export async function loginWithGoogleAction(
       'เข้าสู่ระบบด้วย Google ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
     );
   }
-
-  if (isPendingEmailVerification(response)) {
+  if (!isLoginTokensResponse(response))
     return {
-      success: true,
-      needsVerification: true,
-      email: response.email,
-      message: response.message,
+      success: false,
+      code: 'SOCIAL_RESPONSE_INVALID',
+      message: 'ระบบเข้าสู่ระบบยังไม่พร้อมใช้งาน กรุณาลองใหม่ภายหลัง',
     };
-  }
-
-  if (isOtpRequired(response)) {
-    return { success: true, needsOtp: true, tempToken: response.tempToken };
-  }
-
   await establishSession(response);
   redirect('/');
 }
 
-type LineLoginActionResult =
-  | ErrorActionResult
-  | { success: true; needsOtp: true; tempToken: string }
-  | { success: true; needsOtp: false }
-  | { success: true; needsEmail: true; tempToken: string }
-  | { success: true; needsVerification: true; message: string };
-
+/** แลก LINE code แล้วสร้าง session เฉพาะเมื่อ Backend ส่งผลล็อกอินที่สมบูรณ์ */
 export async function loginWithLineAction(
   code: string,
   redirectUri: string,
-): Promise<LineLoginActionResult> {
+): Promise<ErrorActionResult> {
   let response;
   try {
     response = await loginWithLineRequest({ code, redirectUri });
@@ -125,55 +103,12 @@ export async function loginWithLineAction(
       'เข้าสู่ระบบด้วย LINE ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
     );
   }
-
-  if (isLineEmailRequired(response)) {
-    return { success: true, needsEmail: true, tempToken: response.tempToken };
-  }
-
-  if (isPendingEmailVerification(response)) {
+  if (!isLoginTokensResponse(response))
     return {
-      success: true,
-      needsVerification: true,
-      message: response.message,
+      success: false,
+      code: 'SOCIAL_RESPONSE_INVALID',
+      message: 'ระบบเข้าสู่ระบบยังไม่พร้อมใช้งาน กรุณาลองใหม่ภายหลัง',
     };
-  }
-
-  if (isOtpRequired(response)) {
-    return { success: true, needsOtp: true, tempToken: response.tempToken };
-  }
-
-  await establishSession(response);
-  redirect('/');
-}
-
-type CompleteLineRegistrationActionResult =
-  | ErrorActionResult
-  | { success: true; needsOtp: true; tempToken: string }
-  | { success: true; needsOtp: false }
-  | { success: true; needsVerification: true; message: string };
-
-export async function completeLineRegistrationAction(
-  payload: CompleteLineRegistrationPayload,
-): Promise<CompleteLineRegistrationActionResult> {
-  let response;
-  try {
-    response = await completeLineRegistrationRequest(payload);
-  } catch (err) {
-    return toErrorResult(err, 'ยืนยันอีเมลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
-  }
-
-  if (isPendingEmailVerification(response)) {
-    return {
-      success: true,
-      needsVerification: true,
-      message: response.message,
-    };
-  }
-
-  if (isOtpRequired(response)) {
-    return { success: true, needsOtp: true, tempToken: response.tempToken };
-  }
-
   await establishSession(response);
   redirect('/');
 }

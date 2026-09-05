@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { GoogleIcon, LineIcon } from '@/components/auth/BrandIcons';
+import { SocialAuthButtons } from '@/components/auth/social-auth-buttons';
 import { OtpBoxes } from '@/components/auth/OtpBoxes';
 import { useResendCooldown } from '@/hooks/use-resend-cooldown';
 import { cn } from '@/lib/utils';
@@ -19,7 +19,6 @@ import {
   verifyEmailAction,
   resendVerificationAction,
 } from '@/lib/action/verify-email.actions';
-import { useRouter } from 'next/navigation';
 
 const registerSchema = z
   .object({
@@ -70,8 +69,8 @@ function PasswordInput({
   );
 }
 
+/** ฟอร์มสมัครด้วยอีเมลและ OTP เดิม พร้อมปุ่มสมัคร social ที่เริ่มใช้งานได้โดยตรง */
 export function RegisterForm() {
-  const router = useRouter();
   const [step, setStep] = useState<'register' | 'otp'>('register');
   const [registeredEmail, setRegisteredEmail] = useState('');
   const [otp, setOtp] = useState('');
@@ -221,7 +220,8 @@ export function RegisterForm() {
               }
             }}
           >
-            เคยสมัครแล้วแต่ยังไม่ได้ยืนยันรหัส OTP? คลิกที่นี่เพื่อกรอก OTP หรือขอรหัสใหม่
+            เคยสมัครแล้วแต่ยังไม่ได้ยืนยันรหัส OTP? คลิกที่นี่เพื่อกรอก OTP
+            หรือขอรหัสใหม่
           </button>
         </div>
       )}
@@ -337,26 +337,8 @@ export function RegisterForm() {
         <span className="h-px flex-1 bg-border" />
       </div>
 
-      <Button
-        type="button"
-        variant="outline"
-        size="lg"
-        className="w-full"
-        onClick={() => router.push('/login')}
-      >
-        <GoogleIcon className="size-4" />
-        สมัครใช้งานด้วย Google
-      </Button>
-
-      <Button
-        type="button"
-        size="lg"
-        className="w-full bg-[#06C755] text-white hover:bg-[#05b34c]"
-        onClick={() => router.push('/login')}
-      >
-        <LineIcon className="size-4" />
-        สมัครใช้งานด้วย LINE
-      </Button>
+      {/* Google/LINE ใช้การยืนยันจาก provider โดยไม่ส่ง OTP เพิ่ม */}
+      <SocialAuthButtons mode="register" />
 
       <p className="text-center text-sm text-muted-foreground">
         มีบัญชีอยู่แล้ว?{' '}
