@@ -872,6 +872,8 @@ export function CreatePostForm({ initialPets }: CreatePostFormProps) {
         setPendingUploadPostId(postId);
       }
 
+      // รูปบันทึกแล้วแต่ AI อาจขัดข้อง ให้แจ้งแยกกันเพื่อไม่อัปโหลดซ้ำ
+      let aiWarning: string | undefined;
       if (selectedFiles.length > 0 || includeProfileImage) {
         const uploadRes = await uploadImages(postId);
         if (!uploadRes.success) {
@@ -880,13 +882,23 @@ export function CreatePostForm({ initialPets }: CreatePostFormProps) {
           );
           return;
         }
+        const result = uploadRes.data;
+        if (
+          result &&
+          typeof result === 'object' &&
+          'aiWarning' in result &&
+          typeof result.aiWarning === 'string'
+        ) {
+          aiWarning = result.aiWarning;
+        }
       }
 
       setPendingUploadPostId(null);
       notify(
-        selectedFiles.length > 0 || includeProfileImage
-          ? 'เผยแพร่ประกาศและอัปโหลดรูปภาพสำเร็จ! ระบบกำลังเริ่มค้นหาด้วย AI Smart Matching'
-          : 'เผยแพร่ประกาศสำเร็จแล้ว',
+        aiWarning ??
+          (selectedFiles.length > 0 || includeProfileImage
+            ? 'เผยแพร่ประกาศและอัปโหลดรูปภาพสำเร็จแล้ว'
+            : 'เผยแพร่ประกาศสำเร็จแล้ว'),
         4000,
         'success',
       );
