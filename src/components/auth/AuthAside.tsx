@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { AuthAsideIllustration } from './AuthAsideIllustration';
 
 type AuthAsideProps = {
-  /** เปิดดีไซน์ภาพถ่ายเฉพาะหน้า Login/Register ที่ได้รับมอบหมาย */
+  /** เปิดดีไซน์ภาพการ์ตูนเฉพาะหน้า Login/Register ที่ได้รับมอบหมาย */
   appearance?: 'default' | 'entry';
   title?: string;
   description?: string;
@@ -68,8 +68,8 @@ export function AuthAside({
           {/* ภาพใหม่แทนจุดกากบาท ส่วนหน้า Auth อื่นใช้ภาพเดิม */}
           {appearance === 'entry' ? (
             <Image
-              src="/images/auth-pets.png"
-              alt="สุนัขโกลเด้นรีทรีฟเวอร์และแมวนั่งอยู่ด้วยกันหน้าบ้าน"
+              src="/images/auth-pets-cartoon.png"
+              alt="ภาพการ์ตูนสุนัขโกลเด้นรีทรีฟเวอร์และแมวนั่งเคียงข้างกัน"
               fill
               sizes="(min-width: 1280px) 384px, 38vw"
               className="object-cover"
