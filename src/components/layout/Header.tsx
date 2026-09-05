@@ -18,6 +18,7 @@ import {
   LogOut,
 } from 'lucide-react';
 
+import { HeaderNavigation } from './header-navigation';
 import { buttonVariants } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { UserAvatar } from '@/components/common/UserAvatar';
@@ -41,15 +42,6 @@ import {
   markAsReadAction as markNotificationAsReadAction,
   markAllAsReadAction as markAllNotificationsAsReadAction,
 } from '@/lib/action/notifications.actions';
-
-/** รายการลิงก์เมนูนำทางหลักของเว็บไซต์ (Main Navigation Links) */
-const NAV_LINKS = [
-  { href: '/', label: 'หน้าแรก' },
-  { href: '/posts', label: 'ประกาศ' },
-  { href: '/map', label: 'แผนที่' },
-  { href: '/community', label: 'ชุมชน' },
-  { href: '/chat', label: 'แชท' },
-];
 
 /**
  * Header Component (Client Component)
@@ -159,18 +151,18 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-20 max-w-7xl gap-4 items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* 1. โลโก้และชื่อแบรนด์ Pawnd ทางซ้าย */}
         <Link
           href="/"
-          className="flex items-center gap-2.5 transition-opacity hover:opacity-90"
+          className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-90"
         >
           <Image
             src="/logo.png"
             alt="PAWND Logo"
-            width={34}
-            height={34}
-            className="size-8.5 rounded-full object-contain"
+            width={40}
+            height={40}
+            className="size-10 rounded-full object-contain"
           />
           <span className="text-xl font-bold tracking-tight text-primary">
             Pawnd
@@ -178,46 +170,10 @@ export default function Header() {
         </Link>
 
         {/* 2. เมนูนำทางบนหน้าจอ Desktop (กึ่งกลาง) */}
-        <nav className="hidden md:flex items-center gap-7">
-          {NAV_LINKS.map((link) => {
-            const isActive =
-              link.href === '/'
-                ? pathname === '/'
-                : pathname.startsWith(link.href);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  'text-sm font-medium transition-colors hover:text-primary',
-                  isActive
-                    ? 'font-semibold text-primary'
-                    : 'text-muted-foreground',
-                )}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-
-          {/* ปุ่มแอดมิน แสดงเฉพาะบัญชีที่ role เป็น ADMIN เท่านั้น */}
-          {isAdmin && (
-            <Link
-              href="/admin"
-              className={cn(
-                'text-sm font-medium transition-colors hover:text-primary',
-                pathname.startsWith('/admin')
-                  ? 'font-semibold text-primary'
-                  : 'text-muted-foreground',
-              )}
-            >
-              แอดมิน
-            </Link>
-          )}
-        </nav>
+        <HeaderNavigation pathname={pathname} isAdmin={isAdmin} />
 
         {/* 3. ส่วนเครื่องมือและข้อมูลผู้ใช้บน Desktop (ทางขวา) */}
-        <div className="hidden sm:flex items-center gap-2.5">
+        <div className="hidden xl:flex items-center gap-2">
           {/* ปุ่มสลับโหมดมืด / โหมดสว่าง (Dark / Light Theme Toggle) */}
           <ThemeToggle />
 
@@ -379,12 +335,14 @@ export default function Header() {
         </div>
 
         {/* 4. แถบเครื่องมือบนมือถือ (ปุ่มสลับธีม + ปุ่มเปิดเมนู Hamburger) */}
-        <div className="flex sm:hidden items-center gap-1.5">
+        <div className="flex xl:hidden items-center gap-1.5">
           <ThemeToggle />
           <button
             type="button"
             onClick={() => setMobileMenuOpen((open) => !open)}
-            aria-label="เปิดเมนูนำทาง"
+            aria-label={mobileMenuOpen ? 'ปิดเมนูนำทาง' : 'เปิดเมนูนำทาง'}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="header-mobile-menu"
             className="flex size-10 min-h-[40px] min-w-[40px] items-center justify-center rounded-xl text-foreground hover:bg-muted active:scale-95"
           >
             {mobileMenuOpen ? (
@@ -398,45 +356,34 @@ export default function Header() {
 
       {/* 5. เมนู Drawer สำหรับหน้าจอมือถือ (เปิดขึ้นเมื่อกดปุ่ม Hamburger) */}
       {mobileMenuOpen && (
-        <div className="border-b border-border bg-background px-4 py-4 sm:hidden">
-          <nav className="flex flex-col gap-2">
-            {NAV_LINKS.map((link) => {
-              const isActive =
-                link.href === '/' ? pathname === '/' : pathname === link.href;
-
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    'flex min-h-[40px] items-center rounded-xl px-3 text-sm font-medium transition-colors hover:bg-muted',
-                    isActive
-                      ? 'bg-muted text-primary font-semibold'
-                      : 'text-foreground',
-                  )}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-
-            {/* ปุ่มแอดมินบนมือถือ แสดงเฉพาะบัญชีที่ role เป็น ADMIN เท่านั้น */}
-            {isAdmin && (
+        <div
+          id="header-mobile-menu"
+          className="max-h-[calc(100dvh-5rem)] overflow-y-auto border-t border-border bg-muted/40 px-4 py-4 xl:hidden"
+        >
+          <div className="mx-auto flex max-w-7xl flex-col gap-4">
+            <HeaderNavigation
+              pathname={pathname}
+              isAdmin={isAdmin}
+              mobile
+              onNavigate={() => setMobileMenuOpen(false)}
+            />
+            {/* ทางเข้าบัญชีบนมือถือ ใช้ปุ่มส่วนกลางและเส้นทางเดิม */}
+            <div className="grid grid-cols-2 gap-2 border-t border-border pt-4">
               <Link
-                href="/admin"
+                href={isLoggedIn ? '/profile' : '/login'}
                 onClick={() => setMobileMenuOpen(false)}
-                className={cn(
-                  'flex min-h-[40px] items-center rounded-xl px-3 text-sm font-medium transition-colors hover:bg-muted',
-                  pathname.startsWith('/admin')
-                    ? 'bg-muted text-primary font-semibold'
-                    : 'text-foreground',
-                )}
+                className={cn(buttonVariants({ variant: 'outline' }), 'h-11')}
               >
-                แอดมิน
+                {isLoggedIn ? 'โปรไฟล์ผู้ใช้' : 'เข้าสู่ระบบ'}
               </Link>
-            )}
-
+              <Link
+                href={isLoggedIn ? '/notifications' : '/register'}
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(buttonVariants({ variant: 'outline' }), 'h-11')}
+              >
+                {isLoggedIn ? 'การแจ้งเตือน' : 'สมัครสมาชิก'}
+              </Link>
+            </div>
             {/* แถวสลับธีมบนมือถือ */}
             <div className="flex items-center justify-between border-t border-border pt-3">
               <span className="text-sm font-medium text-muted-foreground">
@@ -459,7 +406,7 @@ export default function Header() {
                 <span>แจ้งสัตว์เลี้ยงหาย</span>
               </Link>
             </div>
-          </nav>
+          </div>
         </div>
       )}
     </header>
